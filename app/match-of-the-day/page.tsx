@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabase'
 export default function MatchOfTheDay() {
   const [match, setMatch] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [responded, setResponded] = useState(false)
   const [existingResponse, setExistingResponse] = useState<string | null>(null)
   const router = useRouter()
 
@@ -18,7 +17,6 @@ export default function MatchOfTheDay() {
 
       const today = new Date().toISOString().split('T')[0]
 
-      // Check if already matched today
       const { data: existing } = await supabase
         .from('daily_matches')
         .select('*, profiles!daily_matches_matched_with_fkey(*)')
@@ -33,7 +31,6 @@ export default function MatchOfTheDay() {
         return
       }
 
-      // Get current user profile
       const { data: me } = await supabase
         .from('profiles')
         .select('*')
@@ -42,7 +39,6 @@ export default function MatchOfTheDay() {
 
       if (!me) { router.push('/onboarding'); return }
 
-      // Get all other profiles
       const { data: others } = await supabase
         .from('profiles')
         .select('*')
@@ -53,7 +49,6 @@ export default function MatchOfTheDay() {
         return
       }
 
-      // Score by shared interests + life stage + age
       const scored = others.map((p: any) => {
         const shared = p.interests?.filter((i: string) => me.interests?.includes(i)).length || 0
         const stage = p.life_stage === me.life_stage ? 3 : 0
@@ -63,7 +58,6 @@ export default function MatchOfTheDay() {
       scored.sort((a: any, b: any) => b.score - a.score)
       const best = scored[0]
 
-      // Save daily match
       await supabase.from('daily_matches').insert({
         user_id: user.id,
         matched_with: best.id,
@@ -86,7 +80,6 @@ export default function MatchOfTheDay() {
       .eq('user_id', user.id)
       .eq('date', today)
     setExistingResponse(response)
-    setResponded(true)
   }
 
   return (
@@ -96,12 +89,11 @@ export default function MatchOfTheDay() {
           <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Your match today</p>
           <h1 className="text-4xl font-bold">GNG</h1>
         </div>
-
         {loading ? (
           <p className="text-gray-400">Finding your match...</p>
         ) : !match ? (
           <p className="text-gray-400">No matches available yet. Check back soon.</p>
-        ) : responded || existingResponse ? (
+        ) : existingResponse ? (
           <div className="bg-gray-900 rounded-2xl p-8 space-y-2">
             <p className="text-gray-400 text-sm">You said <span className={existingResponse === 'yes' ? 'text-green-400' : 'text-red-400'}>{existingResponse}</span> to</p>
             <h2 className="text-2xl font-bold">{match.name}, {match.age}</h2>

@@ -10,7 +10,7 @@ export default function Home() {
           Making real friends as a guy is hard. GNG matches you with men at the same life stage, with shared interests, nearby.
         </p>
         <Link
-          href="/match-of-the-day"
+          href="/app/match-of-the-day"
           className="bg-white text-black px-8 py-3 rounded-full font-semibold text-lg hover:bg-gray-200 transition"
         >
           Find your guys

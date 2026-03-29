@@ -23,15 +23,18 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 w-full bg-black border-b border-gray-800 px-6 py-3 flex justify-between items-center z-50">
+      <div className="flex items-center gap-6">
         <Link href="/" className="font-bold text-white text-lg">GNG</Link>
+        <Link href="/match-of-the-day" className="text-gray-400 text-sm hover:text-white">Today's Match</Link>
         <Link href="/messages" className="text-gray-400 text-sm hover:text-white">Requests</Link>
         <Link href="/connections" className="text-gray-400 text-sm hover:text-white">Connections</Link>
+      </div>
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-semibold">
+            <Link href="/profile" className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-semibold">
               {user.email?.[0].toUpperCase()}
-            </div>
+            </Link>
             <button onClick={signOut} className="text-gray-400 text-sm hover:text-white">Sign out</button>
           </>
         ) : (

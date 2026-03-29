@@ -23,7 +23,8 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 w-full bg-black border-b border-gray-800 px-6 py-3 flex justify-between items-center z-50">
-      <Link href="/" className="font-bold text-white text-lg">GNG</Link>
+        <Link href="/" className="font-bold text-white text-lg">GNG</Link>
+        <Link href="/messages" className="text-gray-400 text-sm hover:text-white">Requests</Link>
       <div className="flex items-center gap-4">
         {user ? (
           <>

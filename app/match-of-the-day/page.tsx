@@ -6,8 +6,10 @@ import { supabase } from '@/lib/supabase'
 
 export default function MatchOfTheDay() {
   const [match, setMatch] = useState<any>(null)
+  const [me, setMe] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [existingResponse, setExistingResponse] = useState<string | null>(null)
+  const [reason, setReason] = useState<string>('')
   const router = useRouter()
 
   useEffect(() => {
@@ -24,20 +26,23 @@ export default function MatchOfTheDay() {
         .eq('date', today)
         .single()
 
-      if (existing) {
-        setMatch(existing.profiles)
-        setExistingResponse(existing.response)
-        setLoading(false)
-        return
-      }
-
-      const { data: me } = await supabase
+      const { data: myProfile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
 
-      if (!me) { router.push('/onboarding'); return }
+      setMe(myProfile)
+
+      if (existing) {
+        setMatch(existing.profiles)
+        setExistingResponse(existing.response)
+        setLoading(false)
+        fetchReason(myProfile, existing.profiles)
+        return
+      }
+
+      if (!myProfile) { router.push('/onboarding'); return }
 
       const { data: others } = await supabase
         .from('profiles')
@@ -50,9 +55,9 @@ export default function MatchOfTheDay() {
       }
 
       const scored = others.map((p: any) => {
-        const shared = p.interests?.filter((i: string) => me.interests?.includes(i)).length || 0
-        const stage = p.life_stage === me.life_stage ? 3 : 0
-        const age = Math.abs(p.age - me.age) < 3 ? 3 : Math.abs(p.age - me.age) < 7 ? 1 : 0
+        const shared = p.interests?.filter((i: string) => myProfile.interests?.includes(i)).length || 0
+        const stage = p.life_stage === myProfile.life_stage ? 3 : 0
+        const age = Math.abs(p.age - myProfile.age) < 3 ? 3 : Math.abs(p.age - myProfile.age) < 7 ? 1 : 0
         return { ...p, score: shared + stage + age }
       })
       scored.sort((a: any, b: any) => b.score - a.score)
@@ -66,9 +71,25 @@ export default function MatchOfTheDay() {
 
       setMatch(best)
       setLoading(false)
+      fetchReason(myProfile, best)
     }
     load()
   }, [])
+
+  const fetchReason = async (myProfile: any, matchProfile: any) => {
+    console.log('fetchReason called', myProfile, matchProfile)
+    try {
+      const res = await fetch('/api/match-reason', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ me: myProfile, match: matchProfile })
+      })
+      const data = await res.json()
+      setReason(data.reason)
+    } catch {
+      setReason('')
+    }
+  }
 
   const respond = async (response: 'yes' | 'no') => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -98,6 +119,7 @@ export default function MatchOfTheDay() {
             <p className="text-gray-400 text-sm">You said <span className={existingResponse === 'yes' ? 'text-green-400' : 'text-red-400'}>{existingResponse}</span> to</p>
             <h2 className="text-2xl font-bold">{match.name}, {match.age}</h2>
             <p className="text-gray-400">{match.city} · {match.life_stage}</p>
+            {reason && <p className="text-gray-400 text-sm italic">"{reason}"</p>}
             <p className="text-gray-300 text-sm mt-2">{existingResponse === 'yes' ? "If they say yes too, you'll both be connected." : "Come back tomorrow for a new match."}</p>
           </div>
         ) : (
@@ -109,6 +131,7 @@ export default function MatchOfTheDay() {
               <h2 className="text-2xl font-bold">{match.name}, {match.age}</h2>
               <p className="text-gray-400">{match.city} · {match.life_stage}</p>
             </div>
+            {reason && <p className="text-gray-400 text-sm italic">"{reason}"</p>}
             <div className="flex flex-wrap gap-2 justify-center">
               {match.interests?.map((i: string) => (
                 <span key={i} className="bg-gray-800 px-3 py-1 rounded-full text-xs">{i}</span>

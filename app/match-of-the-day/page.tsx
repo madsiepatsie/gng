@@ -100,7 +100,7 @@ export default function MatchOfTheDay() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 pt-16">
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center px-4 pt-24"
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
           <p className="text-xs uppercase tracking-[0.3em] text-gray-600 mb-1">Your match today</p>

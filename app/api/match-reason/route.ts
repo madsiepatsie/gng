@@ -19,16 +19,17 @@ Bio: ${match.bio}
 
 Write only the sentence, no preamble.`
 
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }]
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
     })
   })
 
   const data = await res.json()
-  const reason = data.candidates?.[0]?.content?.parts?.[0]?.text || 'You two have a lot in common.'
+  console.log('Gemini response:', JSON.stringify(data))
+  const reason = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'You two have a lot in common.'
 
   return NextResponse.json({ reason })
 }

@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase'
 
 export default function MatchOfTheDay() {
   const [match, setMatch] = useState<any>(null)
-  const [me, setMe] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [existingResponse, setExistingResponse] = useState<string | null>(null)
   const [reason, setReason] = useState<string>('')
@@ -31,8 +30,6 @@ export default function MatchOfTheDay() {
         .select('*')
         .eq('id', user.id)
         .single()
-
-      setMe(myProfile)
 
       if (existing) {
         setMatch(existing.profiles)
@@ -77,7 +74,6 @@ export default function MatchOfTheDay() {
   }, [])
 
   const fetchReason = async (myProfile: any, matchProfile: any) => {
-    console.log('fetchReason called', myProfile, matchProfile)
     try {
       const res = await fetch('/api/match-reason', {
         method: 'POST',
@@ -104,43 +100,65 @@ export default function MatchOfTheDay() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 pt-16">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div>
-          <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Your match today</p>
-          <h1 className="text-4xl font-bold">GNG</h1>
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 pt-16">
+      <div className="max-w-sm w-full">
+        <div className="text-center mb-8">
+          <p className="text-xs uppercase tracking-[0.3em] text-gray-600 mb-1">Your match today</p>
+          <p className="text-xs text-gray-700">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
+
         {loading ? (
-          <p className="text-gray-400">Finding your match...</p>
+          <div className="text-center text-gray-600 text-sm">Finding your match...</div>
         ) : !match ? (
-          <p className="text-gray-400">No matches available yet. Check back soon.</p>
+          <div className="text-center text-gray-600 text-sm">No matches available yet.</div>
         ) : existingResponse ? (
-          <div className="bg-gray-900 rounded-2xl p-8 space-y-2">
-            <p className="text-gray-400 text-sm">You said <span className={existingResponse === 'yes' ? 'text-green-400' : 'text-red-400'}>{existingResponse}</span> to</p>
-            <h2 className="text-2xl font-bold">{match.name}, {match.age}</h2>
-            <p className="text-gray-400">{match.city} · {match.life_stage}</p>
-            {reason && <p className="text-gray-400 text-sm italic">"{reason}"</p>}
-            <p className="text-gray-300 text-sm mt-2">{existingResponse === 'yes' ? "If they say yes too, you'll both be connected." : "Come back tomorrow for a new match."}</p>
+          <div className="border border-gray-800 rounded-2xl p-8 text-center space-y-3 bg-[#111]">
+            <div className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center text-xl font-bold mx-auto">
+              {match.name?.[0]?.toUpperCase()}
+            </div>
+            <h2 className="text-xl font-bold">{match.name}, {match.age}</h2>
+            <p className="text-gray-500 text-sm">{match.city} · {match.life_stage}</p>
+            <p className={`text-sm font-medium ${existingResponse === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
+              {existingResponse === 'yes' ? '✓ You said yes' : '✕ You passed'}
+            </p>
+            {reason && <p className="text-gray-500 text-xs italic border-t border-gray-800 pt-3">"{reason}"</p>}
+            <p className="text-gray-600 text-xs pt-1">
+              {existingResponse === 'yes' ? "If they say yes too, you'll be connected. Check back tomorrow." : "Come back tomorrow for a new match."}
+            </p>
           </div>
         ) : (
-          <div className="bg-gray-900 rounded-2xl p-8 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl font-bold mx-auto">
-              {match.name?.[0]}
+          <div className="border border-gray-800 rounded-2xl overflow-hidden bg-[#111]">
+            <div className="p-8 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center text-2xl font-bold mx-auto border border-gray-700">
+                {match.name?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">{match.name}, {match.age}</h2>
+                <p className="text-gray-500 text-sm mt-1">{match.city} · {match.life_stage}</p>
+              </div>
+              {reason && (
+                <p className="text-gray-400 text-sm italic">"{reason}"</p>
+              )}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {match.interests?.map((i: string) => (
+                  <span key={i} className="bg-gray-900 border border-gray-800 px-3 py-1 rounded-full text-xs text-gray-400">{i}</span>
+                ))}
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">{match.bio}</p>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold">{match.name}, {match.age}</h2>
-              <p className="text-gray-400">{match.city} · {match.life_stage}</p>
-            </div>
-            {reason && <p className="text-gray-400 text-sm italic">"{reason}"</p>}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {match.interests?.map((i: string) => (
-                <span key={i} className="bg-gray-800 px-3 py-1 rounded-full text-xs">{i}</span>
-              ))}
-            </div>
-            <p className="text-gray-300 text-sm">{match.bio}</p>
-            <div className="flex gap-4 pt-2">
-              <button onClick={() => respond('no')} className="flex-1 border border-gray-700 text-white py-3 rounded-full text-lg hover:border-red-500 hover:text-red-400 transition">✕</button>
-              <button onClick={() => respond('yes')} className="flex-1 bg-white text-black py-3 rounded-full text-lg font-semibold hover:bg-green-400 transition">✓</button>
+            <div className="grid grid-cols-2 border-t border-gray-800">
+              <button
+                onClick={() => respond('no')}
+                className="py-4 text-gray-500 hover:text-red-400 hover:bg-red-400/5 transition-all text-lg border-r border-gray-800"
+              >
+                ✕
+              </button>
+              <button
+                onClick={() => respond('yes')}
+                className="py-4 text-gray-400 hover:text-green-400 hover:bg-green-400/5 transition-all text-lg font-semibold"
+              >
+                ✓
+              </button>
             </div>
           </div>
         )}

@@ -112,7 +112,7 @@ export default function MatchOfTheDay() {
         ) : !match ? (
           <div className="text-center text-gray-600 text-sm">No matches available yet.</div>
         ) : existingResponse ? (
-          <div className="border border-gray-800 rounded-2xl p-8 text-center space-y-3 bg-[#111]">
+          <div className="border border-gray-800 rounded-2xl p-8 text-center space-y-3 bg-[#111] float">
             <div className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center text-xl font-bold mx-auto">
               {match.name?.[0]?.toUpperCase()}
             </div>

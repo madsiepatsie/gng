@@ -39,7 +39,7 @@ export default function Onboarding() {
       ...form,
       age: parseInt(form.age)
     })
-    router.push('/matches')
+    router.push('/match-of-the-day')
   }
 
   return (
